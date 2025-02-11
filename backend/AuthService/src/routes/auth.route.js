@@ -4,17 +4,18 @@ import { protectedRoute, protectedAdminRoute } from '../middleware/auth.middlewa
 
 const router = express.Router();
 
-router.post('/signup', signup);
-router.post('/login', login);
-router.post('/logout', logout);
+router.post('/users', signup); 
+router.post('/sessions', login); 
+router.delete('/sessions', logout);
 
-router.post('/request-password-reset', requestPasswordReset);
-router.post('/reset-password', resetPassword);
+router.post('/password/reset-request', requestPasswordReset); 
+router.post('/password/reset', resetPassword);
 
-router.put('/update-profile', protectedRoute, updateProfile);
+router.get('/profile', protectedRoute, checkAuth); 
+router.put('/profile', protectedRoute, updateProfile);
+
+router.patch('/users/:id/role', protectedAdminRoute, changeRole);
 
 router.get('/check-user', protectedRoute, checkAuth);
-
-router.put('/change-role', protectedAdminRoute, changeRole);
 
 export default router;

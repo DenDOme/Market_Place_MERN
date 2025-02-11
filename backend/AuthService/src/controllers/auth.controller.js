@@ -5,84 +5,80 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
 export const signup = async (req, res) => {
-    const {fullName, email, password} = req.body;
+    const { fullName, email, password } = req.body;
+
     try {
-        if(password.length < 6) {
-            return res.status(400).json({message: "Password must be more than 6 characthers"});
+        if (!fullName || !email || !password) {
+            return res.status(400).json({ message: "All fields must be provided" });
         }
 
-        if(!fullName || !email || !password){
-            return res.status(400).json({message: "All fields must be provided"})
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
         }
 
-        const user = User.findOne(email);
+        const existingUser = await User.findOne({ email });
 
-        if(user) {
-            return res.status(400).json({message: "User already exists"})
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
         }
 
-        const salt = bcrypt.genSalt(20);
+        const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
             fullName,
             email,
             password: hashedPassword
-        })
+        });
 
-        if(newUser){
-            generateToken(newUser._id, res);
-            await newUser.save();
+        await newUser.save();
+        generateToken(newUser._id, res);
 
-            res.status(201).json({
-                _id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email
-            })
-        }
-
-        else {
-            return res.status(400).json({ message: "Invalid user data" });
-        }
-
+        res.status(201).json({
+            _id: newUser._id,
+            fullName: newUser.fullName,
+            email: newUser.email
+        });
 
     } catch (error) {
         console.error('Error in signup | auth controller', error.message);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const login = async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     try {
-        if(!email, !password) {
-            return res.status(400).json({message: "All field must be provided"});        
+        if (!email || !password) {
+            return res.status(400).json({ message: "All fields must be provided" });
         }
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({ email });
 
-        if(!user) {
-            return res.status(400).json({ message: "Invalid credentials" });
+        if (!user) {
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const isPasswordCorrect = bcrypt.compare(password, user.hashedPassword);
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-        if(!isPasswordCorrect) {
-            return res.status(400).json({ message: "Invalid credentails" });
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
         generateToken(user._id, res);
 
-        res.status(400).json({
+        res.status(200).json({
             _id: user._id,
             fullName: user.fullName,
-            email: user.email,
-        })
+            email: user.email
+        });
+
     } catch (error) {
         console.error('Error in login | auth controller', error.message);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+
 
 export const updateProfile = async (req, res) => {
     const {fullName, email, password} = req.body;
@@ -175,7 +171,7 @@ export const requestPasswordReset = async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        res.json({ message: "Reset token sent to email" });
+        res.status(200).json({ message: "Reset token sent to email" });
     } catch (error) {
         console.error('Error in requestPasswordReset | auth controller', error.message);
         res.status(500).json({message: "Internal Server Error"});
@@ -184,6 +180,7 @@ export const requestPasswordReset = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
     const { resetToken, newPassword } = req.body;
+
     try {
         const user = await User.findOne({ resetToken: { $exists: true } });
 
@@ -202,29 +199,33 @@ export const resetPassword = async (req, res) => {
         res.status(200).json({ message: "Password reset successful" });
     } catch (error) {
         console.error('Error in resetPassword | auth controller', error.message);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
+
 export const changeRole = async (req, res) => {
-    const {_id, role} = req.body
+    const { role } = req.body;
+    const { id } = req.params; 
+
     try {
-        if(!_id || !role) {
-            return res.status(400).json({ message: "All field must be provided" });
+        if (!role) {
+            return res.status(400).json({ message: "Role must be provided" });
         }
 
-        const user = await User.findById(_id)
+        const user = await User.findById(id);
 
-        if(!user) {
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
-        } 
+        }
 
         user.role = role;
         await user.save();
-        
-        res.status(200).json({ message: "Role granted" });
+
+        res.status(200).json({ message: "User role updated successfully" });
+
     } catch (error) {
         console.error('Error in changeRole | auth controller', error.message);
-        res.status(500).json({message: "Internal Server Error"});
+        res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
