@@ -10,7 +10,7 @@ export const connectRabbitMQ = async () => {
         channel = await connection.createChannel();
         await channel.assertExchange("product_event", "fanout", { durable: false });
 
-        const q = await channel.assertQueue("", { exclusive: true });
+        const q = await channel.assertQueue("", { durable: true });
         console.log("Order Service listenning for Product Service");
 
         channel.bindQueue(q.queue, "product_event", "");
@@ -25,6 +25,8 @@ export const connectRabbitMQ = async () => {
                 } else if(eventType === 'product.deleted'){
                     await removeCache(data._id);
                 }
+
+                channel.ack(msg);
             }
         }, { noAck: true });
     } catch (error) {

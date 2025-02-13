@@ -20,5 +20,5 @@ export const publishEvent = async (eventType, data) => {
         return
     }
 
-    channel.publish("product_event", "", Buffer.from(JSON.stringify({ eventType, data })));
+    channel.publish("product_event", "", Buffer.from(JSON.stringify({ eventType, data })), { persistent: true });
 }
