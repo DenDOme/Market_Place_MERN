@@ -1,23 +1,23 @@
 {
-  "name": "productservice",
+  "name": "orderservice",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
   "dependencies": {
     "amqplib": "^0.10.5",
-    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "ioredis": "^5.5.0",
     "mongoose": "^8.10.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
   }
 }

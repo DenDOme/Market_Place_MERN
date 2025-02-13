@@ -1,4 +1,5 @@
 import cloudinary, { getPublicId } from "../lib/cloudinary.js";
+import { publishEvent } from "../lib/rabbitmq.js";
 import { getRecommendedProducts } from "../middleware/userProductRecommend.middleware.js";
 import Category from "../models/category.model.js";
 import Product from "../models/product.model.js"; 
@@ -36,6 +37,12 @@ export const createProduct = async (req, res) => {
         });
         await newProduct.save();
 
+        await publishEvent("product.created", {
+            _id: newProduct._id, 
+            name: newProduct.name,
+            price: newProduct.price
+        });
+
         res.status(201).json({ message: "Product created successfully" });
     } catch (error) {
         console.error('Error in createProduct | product controller', error.message);
@@ -70,6 +77,10 @@ export const deleteProduct = async (req, res) => {
         }
 
         await Product.deleteOne({ _id: id });
+
+        await publishEvent("product.deleted", { 
+            _id: product._id, 
+        });
 
         res.status(200).json({ message: "Product deleted successfully"});
     } catch (error) {
@@ -125,6 +136,12 @@ export const updateProduct = async (req, res) => {
         product.categoryId = categoryId || product.categoryId;
 
         await product.save();
+
+        await publishEvent("product.updated", { 
+            _id: product._id, 
+            name: product.name, 
+            price: product.price, 
+        });
 
         res.status(200).json({ message: "Product updated successfully" });
     } catch (error) {
