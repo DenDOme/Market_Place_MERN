@@ -11,10 +11,9 @@ router.delete('/sessions', logout);
 router.post('/password/reset-request', requestPasswordReset); 
 router.post('/password/reset', resetPassword);
 
-router.get('/profile', protectedRoute, checkAuth); 
 router.put('/profile', protectedRoute, updateProfile);
 
-router.patch('/users/:id/role', protectedAdminRoute, changeRole);
+router.put('/users/:id/role', protectedAdminRoute, changeRole);
 
 router.get('/check-user', protectedRoute, checkAuth);
 

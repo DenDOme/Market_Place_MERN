@@ -28,7 +28,7 @@ export const signup = async (req, res) => {
         const newUser = new User({
             fullName,
             email,
-            password: hashedPassword
+            hashedPassword
         });
 
         await newUser.save();
@@ -59,7 +59,7 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        const isPasswordCorrect = await bcrypt.compare(password, user.hashedPassword);
 
         if (!isPasswordCorrect) {
             return res.status(401).json({ message: "Invalid credentials" });
@@ -156,10 +156,15 @@ export const requestPasswordReset = async (req, res) => {
         await user.save();
 
         const transporter = nodemailer.createTransport({
-            service: "Gmail",
-            auth:{
+            service: "gmail",
+            auth: {
+                type: "OAuth2",
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.REFRESH_TOKEN,
+                accessToken: process.env.ACCESS_TOKEN,
+                scope: "https://www.googleapis.com/auth/gmail.send"
             }
         });
         
@@ -191,7 +196,8 @@ export const resetPassword = async (req, res) => {
         const isValid = await bcrypt.compare(resetToken, user.resetToken);
         if (!isValid) return res.status(400).json({ message: "Invalid token" });
 
-        user.password = await bcrypt.hash(newPassword, 10);
+        const salt = await bcrypt.genSalt(10);
+        user.hashedPassword = await bcrypt.hash(newPassword, salt);
         user.resetToken = null;
         user.resetTokenExpires = null;
         await user.save();
