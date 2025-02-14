@@ -1,5 +1,5 @@
 import amqp from 'amqplib';
-import { removeCache, updateCache } from '../middleware/productData.js';
+import { removeCache, updateCache } from '../middleware/productData.middleware.js';
 
 const RABBITQM_URL = process.env.RABBITQM_URL;
 let channel;

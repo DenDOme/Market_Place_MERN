@@ -8,9 +8,29 @@ const orderSchema = new mongoose.Schema(
             required: true,
             index: true
         },
+        items: [
+            {
+                productId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Product",
+                    required: true
+                },
+                quantity: {
+                    type: Number,
+                    default: 1,
+                    min: 1
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                    min: 0
+                }
+            }
+        ],
         totalPrice: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         },
         deliveryDate: {
             type: Date,
@@ -36,12 +56,12 @@ const orderSchema = new mongoose.Schema(
         },
         trackingNumber: {
             type: String,
-            unique: true
+            unique: true,
+            sparse: true 
         }
     },
     { timestamps: true }
 );
 
 const Order = mongoose.model("Order", orderSchema);
-
 export default Order;
