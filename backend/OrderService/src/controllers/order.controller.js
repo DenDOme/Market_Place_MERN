@@ -2,7 +2,7 @@ import Cart from "../models/cart.model.js";
 import Order from "../models/order.model.js";
 
 export const createOrder = async (req, res) => {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const cart = await Cart.findOne({ userId }).populate("items.productId");
@@ -41,7 +41,7 @@ export const createOrder = async (req, res) => {
 };
 
 export const getOrders = async (req, res) => {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const orders = await Order.find({ userId }).populate("items.productId");;
@@ -59,7 +59,7 @@ export const getOrders = async (req, res) => {
 
 export const getOneOrder = async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const order = await Order.findOne({ _id: id, userId }).populate("items.productId");
@@ -77,7 +77,7 @@ export const getOneOrder = async (req, res) => {
 
 export const deleteOrder = async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const order = await Order.findOne({ _id: id, userId });
@@ -97,8 +97,7 @@ export const deleteOrder = async (req, res) => {
 
 export const changeOrderStatus = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
-    const { userId } = req.user;
+    const { status, userId } = req.body;
 
     try {d
         const order = await Order.findOne({ _id: id, userId });

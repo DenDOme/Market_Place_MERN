@@ -5,8 +5,7 @@ import Category from "../models/category.model.js";
 import Product from "../models/product.model.js"; 
 
 export const createProduct = async (req, res) => {
-    const { name, description, price, stock, images, categoryId } = req.body;
-    const { userId } = req.user;
+    const { name, description, price, stock, images, categoryId, userId } = req.body;
 
     try {
         if(!name || !description || !price || !stock || !images || !categoryId){
@@ -45,14 +44,14 @@ export const createProduct = async (req, res) => {
 
         res.status(201).json({ message: "Product created successfully" });
     } catch (error) {
-        console.error('Error in createProduct | product controller', error.message);
+        console.error('Error in createProduct | product controller', error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
 export const deleteProduct = async (req, res) => {
-    const {id} = req.params;
-    const {userId} = req.user;
+    const { id } = req.params;
+    const { userId } = req.body;
 
     try {
         if(!id) {
@@ -84,14 +83,13 @@ export const deleteProduct = async (req, res) => {
 
         res.status(200).json({ message: "Product deleted successfully"});
     } catch (error) {
-        console.error('Error in deleteProduct | product controller', error.message);
+        console.error('Error in deleteProduct | product controller', error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
 export const updateProduct = async (req, res) => {
-    const { _id, name, description, price, stock, images, categoryId } = req.body;
-    const { userId } = req.user;
+    const { _id, name, description, price, stock, images, categoryId, userId } = req.body;
 
     try {
         if(!_id) {
@@ -151,7 +149,7 @@ export const updateProduct = async (req, res) => {
 } 
 
 export const getOneProduct = async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
 
     try {
         if(!id) {
@@ -187,7 +185,7 @@ export const findProductByName = async (req, res) => {
 
         res.status(200).json({ products });
     } catch (error) {
-        console.error('Error in findProductByName | product controller', error.message);
+        console.error('Error in findProductByName | product controller', error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
@@ -231,7 +229,7 @@ export const findProductsByFilter = async (req, res) => {
 }
 
 export const getProducts = async (req, res) => {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const recommendedProducts = await getRecommendedProducts(userId);

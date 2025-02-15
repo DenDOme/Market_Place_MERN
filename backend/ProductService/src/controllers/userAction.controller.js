@@ -2,8 +2,7 @@ import Category from '../models/category.model.js';
 import UserAction from '../models/userAction.model.js';
 
 export const createUserAction = async (req, res) => {
-    const { category } = req.body;
-    const { userId } = req.user;
+    const { userId, category } = req.body;
 
     try {
         if(!category) {

@@ -2,8 +2,7 @@ import Review from '../models/review.model.js';
 import Product from '../models/product.model.js';
 
 export const createReview = async (req, res) => {
-    const { productId, rating, comment } = req.body;
-    const { userId } = req.user;
+    const { userId, productId, rating, comment } = req.body;
 
     try {
         if (!productId || !rating || !comment) {
@@ -41,7 +40,7 @@ export const createReview = async (req, res) => {
 
 export const deleteReview = async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         if (!id) {

@@ -2,8 +2,7 @@ import Favourite from '../models/favourite.model.js';
 import Product from '../models/product.model.js';
 
 export const createFavourite = async (req, res) => {
-    const { productId } = req.body;
-    const { userId } = req.user;
+    const { productId, userId } = req.body;
 
     try {
         if (!productId) {
@@ -35,7 +34,7 @@ export const createFavourite = async (req, res) => {
 
 export const deleteFavourite = async (req, res) => {
     const { id } = req.params; 
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         if (!id) {
@@ -57,7 +56,7 @@ export const deleteFavourite = async (req, res) => {
 };
 
 export const getFavourites = async (req, res) => {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const favourites = await Favourite.find({ userId });

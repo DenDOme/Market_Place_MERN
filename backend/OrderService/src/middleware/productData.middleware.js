@@ -1,9 +1,9 @@
-import { removeProductCache, updateProductCache } from "../controllers/productCache.controller";
+import { removeProductCache, updateProductCache } from "../controllers/productCache.controller.js";
 
 
 export const updateCache = async (data) => {
-    const { productId, name, price } = data;
-    await updateProductCache(productId, { name, price });
+    const { _id, name, price } = data;
+    await updateProductCache(_id, { name, price });
 };
 
 export const removeCache = async (productId) => {

@@ -2,7 +2,7 @@ import { createCart } from "../middleware/cart.middleware.js";
 
 export const addItemCart = async (req, res) => {
     const { id } = req.params; 
-    const { userId } = req.user; 
+    const { userId } = req.body; 
 
     try {
         if (!id) {
@@ -40,7 +40,7 @@ export const addItemCart = async (req, res) => {
 
 export const deleteItemCart = async (req, res) => {
     const { id } = req.params;
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         if(!id) {
@@ -71,7 +71,7 @@ export const deleteItemCart = async (req, res) => {
 }
 
 export const getCart = async (req, res) => {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     try {
         const cart = await createCart(userId);

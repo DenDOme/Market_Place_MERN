@@ -45,7 +45,8 @@ export const deleteCategory = async (req, res) => {
 }
 
 export const changeCategory = async (req, res) => {
-    const { id, name } = req.body;
+    const { id } = req.params
+    const { name } = req.body;
 
     try {
         if (!id || !name) {

@@ -1,16 +1,16 @@
 import amqp from 'amqplib';
 import { removeCache, updateCache } from '../middleware/productData.middleware.js';
 
-const RABBITQM_URL = process.env.RABBITQM_URL;
+const RABBITMQ_URL = process.env.RABBITMQ_URL;
 let channel;
 
 export const connectRabbitMQ = async () => {
     try {
-        const connection = await amqp.connect(RABBITQM_URL);
+        const connection = await amqp.connect(RABBITMQ_URL);
         channel = await connection.createChannel();
         await channel.assertExchange("product_event", "fanout", { durable: false });
 
-        const q = await channel.assertQueue("", { durable: true });
+        const q = await channel.assertQueue("product_queue", { durable: true });
         console.log("Order Service listenning for Product Service");
 
         channel.bindQueue(q.queue, "product_event", "");
@@ -28,7 +28,7 @@ export const connectRabbitMQ = async () => {
 
                 channel.ack(msg);
             }
-        }, { noAck: true });
+        }, { noAck: false });
     } catch (error) {
         console.error("RabbitMQ consumer error", error);
     }
