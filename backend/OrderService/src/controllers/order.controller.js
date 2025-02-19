@@ -2,10 +2,10 @@ import Cart from "../models/cart.model.js";
 import Order from "../models/order.model.js";
 
 export const createOrder = async (req, res) => {
-  const { userId } = req.body;
+  const { userId, address, paymentMethod } = req.body;
 
   try {
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId });
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Your cart is empty" });
@@ -25,8 +25,8 @@ export const createOrder = async (req, res) => {
       })),
       totalPrice,
       deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      address: req.body.address,
-      paymentMethod: req.body.paymentMethod || "Card",
+      address: address,
+      paymentMethod: paymentMethod || "Card",
       paymentStatus: false,
       status: "Pending",
       trackingNumber: `TRK-${Date.now()}`,
@@ -47,7 +47,7 @@ export const getOrders = async (req, res) => {
   const { userId } = req.body;
 
   try {
-    const orders = await Order.find({ userId }).populate("items.productId");
+    const orders = await Order.find({ userId });
 
     if (orders.length === 0) {
       return res.status(404).json({ message: "No orders found" });
@@ -65,9 +65,7 @@ export const getOneOrder = async (req, res) => {
   const { userId } = req.body;
 
   try {
-    const order = await Order.findOne({ _id: id, userId }).populate(
-      "items.productId"
-    );
+    const order = await Order.findOne({ _id: id, userId });
 
     if (!order) {
       return res
@@ -109,7 +107,6 @@ export const changeOrderStatus = async (req, res) => {
   const { status, userId } = req.body;
 
   try {
-    d;
     const order = await Order.findOne({ _id: id, userId });
 
     if (!order) {

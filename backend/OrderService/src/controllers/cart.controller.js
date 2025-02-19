@@ -1,4 +1,5 @@
 import { createCart } from "../middleware/cart.middleware.js";
+import { getProductData } from "./productCache.controller.js";
 
 export const addItemCart = async (req, res) => {
   const { id } = req.params;
