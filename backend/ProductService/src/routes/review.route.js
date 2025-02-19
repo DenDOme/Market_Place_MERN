@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 router.post("/reviews", createReview);
-router.get("/reviews", getReviews);
+router.get("/reviews/:id", getReviews);
 router.delete("/reviews/:id", deleteReview);
 
 export default router;

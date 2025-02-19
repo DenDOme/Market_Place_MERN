@@ -49,14 +49,14 @@ export const deleteReview = async (req, res) => {
       return res.status(400).json({ message: "Invalid review" });
     }
 
-    const review = await Review.findById(id);
-    if (!review || review.userId !== userId) {
+    const review = await Review.findOne({ productId: id, userId });
+    if (!review) {
       return res
         .status(404)
         .json({ message: "Review not found or unauthorized" });
     }
 
-    await Review.deleteOne({ _id: id });
+    await Review.deleteOne({ productId: id, userId });
     res.status(200).json({ message: "Review successfully deleted" });
   } catch (error) {
     console.error("Error in deleteReview | review controller", error.message);

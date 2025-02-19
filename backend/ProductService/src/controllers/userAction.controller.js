@@ -2,31 +2,34 @@ import Category from "../models/category.model.js";
 import UserAction from "../models/userAction.model.js";
 
 export const createUserAction = async (req, res) => {
-  const { userId, category } = req.body;
+  const { userId, categoryId } = req.body;
 
   try {
-    if (!category) {
+    if (!categoryId) {
       return res.status(400).json({ message: "category not provided" });
     }
 
-    const isCategoryExists = await Category.findOne({ category });
+    const isCategoryExists = await Category.findById(categoryId);
     if (!isCategoryExists) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const isUserActionExists = await UserAction.findOne({ userId, category });
+    const isUserActionExists = await UserAction.findOne({ userId, categoryId });
 
     if (!isUserActionExists) {
       const newUserAction = new UserAction({
         userId,
-        category,
+        categoryId,
         quantity: 1,
       });
 
       await newUserAction.save();
       return res.status(201).json({ message: "User action created" });
     } else {
-      const ExistingUserAction = await UserAction.findOne({ userId, category });
+      const ExistingUserAction = await UserAction.findOne({
+        userId,
+        categoryId,
+      });
       ExistingUserAction.quantity += 1;
       await ExistingUserAction.save();
       return res.status(200).json({ message: "User action updated" });

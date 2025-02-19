@@ -46,7 +46,10 @@ export const deleteFavourite = async (req, res) => {
       return res.status(400).json({ message: "Invalid Product" });
     }
 
-    const existingFavourite = await Favourite.findOne({ userId, id });
+    const existingFavourite = await Favourite.findOne({
+      productId: id,
+      userId,
+    });
     if (!existingFavourite) {
       return res
         .status(404)
@@ -85,9 +88,10 @@ export const getFavourites = async (req, res) => {
 
 export const getOneFavourite = async (req, res) => {
   const { id } = req.params;
+  const { userId } = req.body;
 
   try {
-    const favourite = await Favourite.findById(id);
+    const favourite = await Favourite.findOne({ productId: id, userId });
     if (!favourite) {
       return res.status(404).json({ message: "Favorite not found" });
     }
