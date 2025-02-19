@@ -1,5 +1,5 @@
-import express from 'express';
-import { createUserAction } from '../controllers/userAction.controller.js';
+import express from "express";
+import { createUserAction } from "../controllers/userAction.controller.js";
 
 const router = express.Router();
 
