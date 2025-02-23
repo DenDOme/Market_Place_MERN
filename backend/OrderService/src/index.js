@@ -25,8 +25,8 @@ app.use(
   })
 );
 
-app.use("/api/order", orderRoutes);
-app.use("/api/cart", cartRouter);
+app.use("/order-service/order", orderRoutes);
+app.use("/order-service/cart", cartRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -8,9 +8,9 @@ import {
 
 const router = express.Router();
 
-router.post("/favourites", createFavourite);
-router.get("/favourites", getFavourites);
-router.get("/favourites/:id", getOneFavourite);
-router.delete("/favourites/:id", deleteFavourite);
+router.post("/", createFavourite);
+router.get("/", getFavourites);
+router.get("/:id", getOneFavourite);
+router.delete("/:id", deleteFavourite);
 
 export default router;

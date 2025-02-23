@@ -9,14 +9,14 @@ import {
 
 const router = express.Router();
 
-router.post("/orders", createOrder);
+router.post("/", createOrder);
 
-router.get("/orders", getOrders);
+router.get("/", getOrders);
 
-router.get("/orders/:id", getOneOrder);
+router.get("/:id", getOneOrder);
 
-router.delete("/orders/:id", deleteOrder);
+router.delete("/:id", deleteOrder);
 
-router.put("/orders/:id/status", changeOrderStatus);
+router.put("/:id/status", changeOrderStatus);
 
 export default router;

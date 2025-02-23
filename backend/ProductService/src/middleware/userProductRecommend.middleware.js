@@ -7,7 +7,6 @@ export const getRecommendedProducts = async (userId) => {
   try {
     console.log("userId is: ", userId);
 
-    // Fetch user actions
     const userActions = await UserAction.find({ userId });
     console.log("User Actions:", userActions);
 
@@ -16,13 +15,11 @@ export const getRecommendedProducts = async (userId) => {
       return [];
     }
 
-    // Extract category IDs
     const clickedCategories = userActions.map((action) =>
       action.categoryId.toString()
     );
     console.log("Clicked categories:", clickedCategories);
 
-    // Get favorite and reviewed products
     const favoriteProducts = await Favourite.find({ userId }).distinct(
       "productId"
     );
@@ -32,22 +29,18 @@ export const getRecommendedProducts = async (userId) => {
     console.log("Favorite Products:", favoriteProducts);
     console.log("Reviewed Products:", reviewedProducts);
 
-    // Combine interacted products
     const interactedProducts = [
       ...new Set([...favoriteProducts, ...reviewedProducts]),
     ].map((id) => id.toString());
     console.log("Interacted Products:", interactedProducts);
 
-    // MongoDB Aggregation Pipeline
     const recommendations = await Product.aggregate([
-      // Stage 1: Match products in clicked categories and exclude interacted products
       {
         $match: {
           categoryId: { $in: clickedCategories },
           _id: { $nin: interactedProducts },
         },
       },
-      // Stage 2: Add fields for scoring
       {
         $addFields: {
           clickScore: {
@@ -61,7 +54,6 @@ export const getRecommendedProducts = async (userId) => {
           },
         },
       },
-      // Stage 3: Calculate weighted score
       {
         $addFields: {
           weightedScore: {
@@ -73,13 +65,10 @@ export const getRecommendedProducts = async (userId) => {
           },
         },
       },
-      // Stage 4: Sort by weighted score (descending)
       { $sort: { weightedScore: -1 } },
-      // Stage 5: Limit to 20 products
       { $sample: { size: 20 } },
     ]);
 
-    // Fallback: If no recommendations, get popular products
     if (recommendations.length === 0) {
       console.log(
         "No products found in clicked categories. Falling back to popular products."

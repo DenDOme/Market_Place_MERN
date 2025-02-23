@@ -28,11 +28,11 @@ app.use(
   })
 );
 
-app.use("/api/product", productRoutes);
-app.use("/api/category", categoryRoutes);
-app.use("/api/favourite", favouriteRoutes);
-app.use("/api/review", reviewRoutes);
-app.use("/api/user-action", userActionRoutes);
+app.use("/product-service/product", productRoutes);
+app.use("/product-service/category", categoryRoutes);
+app.use("/product-service/favourite", favouriteRoutes);
+app.use("/product-service/review", reviewRoutes);
+app.use("/product-service/user-action", userActionRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

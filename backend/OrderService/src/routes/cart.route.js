@@ -7,10 +7,10 @@ import {
 
 const router = express.Router();
 
-router.get("/carts", getCart);
+router.get("/", getCart);
 
-router.post("/carts/:id", addItemCart);
+router.post("/:id", addItemCart);
 
-router.delete("/carts/:id", deleteItemCart);
+router.delete("/:id", deleteItemCart);
 
 export default router;
