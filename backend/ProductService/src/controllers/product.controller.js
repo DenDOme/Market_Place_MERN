@@ -21,7 +21,9 @@ export const createProduct = async (req, res) => {
 
     const uploadedImages = await Promise.all(
       images.map(async (image) => {
-        const response = await cloudinary.uploader.upload(image);
+        const response = await cloudinary.uploader.upload(image, {
+          folder: "products",
+        });
         return response.secure_url;
       })
     );

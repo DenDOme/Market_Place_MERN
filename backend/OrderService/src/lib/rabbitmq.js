@@ -1,4 +1,4 @@
-import amqp from "amqplib";
+import amqplib from "amqplib";
 import {
   removeCache,
   updateCache,
@@ -9,7 +9,7 @@ let channel;
 
 export const connectRabbitMQ = async () => {
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqplib.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
     await channel.assertExchange("product_event", "fanout", { durable: false });
 
@@ -41,5 +41,6 @@ export const connectRabbitMQ = async () => {
     );
   } catch (error) {
     console.error("RabbitMQ consumer error", error);
+    process.exit(1);
   }
 };

@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/", createOrder);
 
-router.get("/", getOrders);
+router.get("/orders", getOrders);
 
 router.get("/:id", getOneOrder);
 

@@ -1,16 +1,17 @@
-import amqp from "amqplib";
+import amqplib from "amqplib";
 
 let channel;
 const RABBITMQ_URL = process.env.RABBITMQ_URL;
 
 export const connectRabbitMQ = async () => {
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
+    const connection = await amqplib.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
     await channel.assertExchange("product_event", "fanout", { durable: false });
     console.log("Connected to RabbitMQ");
   } catch (error) {
     console.error("Not connected to RabbitMQ", error);
+    process.exit(1);
   }
 };
 

@@ -1,24 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
-import path from "path";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 
+import authRoutes from "./routes/auth.route.js";
+
 dotenv.config();
 
 const PORT = process.env.PORT;
-const __dirname = path.resolve();
 
 const app = express();
 app.use(express.json());
 app.use(helmet());
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
@@ -26,6 +21,8 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 app.use(limiter);
+
+app.use("/api/auth/", authRoutes);
 
 app.listen(PORT, () => {
   console.log(`server on ${PORT}`);

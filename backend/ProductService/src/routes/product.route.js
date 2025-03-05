@@ -23,6 +23,6 @@ router.get("/search", findProductByName);
 
 router.get("/filter", findProductsByFilter);
 
-router.get("/", getProducts);
+router.get("/products", getProducts);
 
 export default router;

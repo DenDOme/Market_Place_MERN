@@ -1,5 +1,21 @@
 import express from "express";
+import redirectMiddleware from "../middlewares/redirect.middleware.js";
 
 const router = express.Router();
+
+router.post("/users", redirectMiddleware);
+
+router.post("/sessions", redirectMiddleware);
+
+router.delete("/sessions", redirectMiddleware);
+
+router.post("/password/reset-request", redirectMiddleware);
+router.post("/password/reset", redirectMiddleware);
+
+router.put("/profile", redirectMiddleware);
+
+router.put("/users/:id/role", redirectMiddleware);
+
+router.get("/check-user", redirectMiddleware);
 
 export default router;
