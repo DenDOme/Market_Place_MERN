@@ -1,5 +1,4 @@
 import express from "express";
 
-const router = express.Router();
-
-export default router;
+export const orderRouter = express.Router();
+export const cartRouter = express.Router();

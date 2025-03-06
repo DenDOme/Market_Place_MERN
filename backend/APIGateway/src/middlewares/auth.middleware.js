@@ -9,7 +9,7 @@ export const authenticateUser = async (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     const response = await axios.get(
-      "http://localhost:4000/auth-service/auth/check-user",
+      "http://auth-service:4000/auth-service/auth/check-user",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
