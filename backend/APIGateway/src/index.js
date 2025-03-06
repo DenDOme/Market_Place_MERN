@@ -13,6 +13,8 @@ import {
   userActionRouter,
 } from "./routes/product.route.js";
 
+import { orderRouter, cartRouter } from "./routes/order.route.js";
+
 dotenv.config();
 
 const PORT = process.env.PORT;
@@ -41,6 +43,9 @@ app.use("/api/favourite/", favouriteRouter);
 app.use("/api/product/", productRouter);
 app.use("/api/review/", reviewRouter);
 app.use("/api/user-action/", userActionRouter);
+
+app.use("/api/order", orderRouter);
+app.use("/api/cart", cartRouter);
 
 app.listen(PORT, () => {
   console.log(`server on ${PORT}`);
