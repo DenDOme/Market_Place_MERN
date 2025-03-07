@@ -1,25 +1,19 @@
 import axios from "axios";
 
 export const authenticateUser = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
+  const authCookie = req.headers.cookie;
   try {
-    if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
-
-    const token = authHeader.split(" ")[1];
+    if (!authCookie) return res.status(401).json({ message: "Unauthorized" });
 
     const response = await axios.get(
       "http://auth-service:4000/auth-service/auth/check-user",
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { cookie: authCookie },
       }
     );
 
     req.user = response.data;
-
-    if (req.method !== "GET") {
-      req.body.userId = response.data._id;
-    }
+    req.body.userId = response.data._id;
 
     next();
   } catch (error) {
