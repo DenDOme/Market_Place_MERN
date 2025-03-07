@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.route.js";
 import {
@@ -20,6 +21,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 app.use(helmet());
 app.use(

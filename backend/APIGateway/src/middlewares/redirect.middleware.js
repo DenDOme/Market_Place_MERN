@@ -37,6 +37,9 @@ const redirectMiddleware = async (req, res, next) => {
       data: req.body,
       timeout: 100000,
       withCredentials: true,
+      headers: {
+        cookie: req.headers.cookie,
+      },
     });
 
     const setCookieHeader = response.headers["set-cookie"];
