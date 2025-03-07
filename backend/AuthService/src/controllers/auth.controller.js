@@ -42,7 +42,7 @@ export const signup = async (req, res) => {
       email: newUser.email,
     });
   } catch (error) {
-    console.error("Error in signup | auth controller", error.message);
+    console.error("Error in signup | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -77,7 +77,7 @@ export const login = async (req, res) => {
       email: user.email,
     });
   } catch (error) {
-    console.error("Error in login | auth controller", error.message);
+    console.error("Error in login | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -122,7 +122,7 @@ export const updateProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error in updateProfile | auth controller", error.message);
+    console.error("Error in updateProfile | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -132,7 +132,7 @@ export const logout = async (req, res) => {
     res.cookie("jwt", "", { maxAge: 0 });
     res.status(200).json({ message: "Logged out successfuly" });
   } catch (error) {
-    console.error("Error in logout | auth controller", error.message);
+    console.error("Error in logout | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -141,7 +141,7 @@ export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
   } catch (error) {
-    console.error("Error in checkAuth | auth controller", error.message);
+    console.error("Error in checkAuth | auth controller", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -154,9 +154,12 @@ export const requestPasswordReset = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = await bcrypt.hash(resetToken, 10);
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
     user.resetToken = hashedToken;
-    user.resetTokenExpires = Date.now() + 3600000; // + 1 hour
+    user.resetTokenExpires = Date.now() + 3600000; // 1 hour expiry
     await user.save();
 
     const transporter = nodemailer.createTransport({
@@ -182,10 +185,7 @@ export const requestPasswordReset = async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.status(200).json({ message: "Reset token sent to email" });
   } catch (error) {
-    console.error(
-      "Error in requestPasswordReset | auth controller",
-      error.message
-    );
+    console.error("Error in requestPasswordReset | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -194,28 +194,30 @@ export const resetPassword = async (req, res) => {
   const { resetToken, newPassword } = req.body;
 
   try {
-    const user = await User.findOne({ resetToken: { $exists: true } });
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-    if (
-      !user ||
-      !user.resetTokenExpires ||
-      user.resetTokenExpires < Date.now()
-    ) {
+    const user = await User.findOne({
+      resetToken: hashedToken,
+      resetTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
 
-    const isValid = await bcrypt.compare(resetToken, user.resetToken);
-    if (!isValid) return res.status(400).json({ message: "Invalid token" });
-
     const salt = await bcrypt.genSalt(10);
     user.hashedPassword = await bcrypt.hash(newPassword, salt);
+
     user.resetToken = null;
     user.resetTokenExpires = null;
     await user.save();
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
-    console.error("Error in resetPassword | auth controller", error.message);
+    console.error("Error in resetPassword | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -240,7 +242,7 @@ export const changeRole = async (req, res) => {
 
     res.status(200).json({ message: "User role updated successfully" });
   } catch (error) {
-    console.error("Error in changeRole | auth controller", error.message);
+    console.error("Error in changeRole | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
