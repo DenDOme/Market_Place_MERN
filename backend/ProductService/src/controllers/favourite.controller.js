@@ -47,7 +47,7 @@ export const deleteFavourite = async (req, res) => {
     }
 
     const existingFavourite = await Favourite.findOne({
-      productId: id,
+      _id: id,
       userId,
     });
     if (!existingFavourite) {
@@ -91,7 +91,7 @@ export const getOneFavourite = async (req, res) => {
   const { userId } = req.body;
 
   try {
-    const favourite = await Favourite.findOne({ productId: id, userId });
+    const favourite = await Favourite.findOne({ _id: id, userId });
     if (!favourite) {
       return res.status(404).json({ message: "Favorite not found" });
     }

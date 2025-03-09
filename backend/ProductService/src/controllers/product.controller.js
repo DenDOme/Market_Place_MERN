@@ -172,7 +172,7 @@ export const getOneProduct = async (req, res) => {
 
     res.status(200).json({ product });
   } catch (error) {
-    console.error("Error in getOneProduct | product controller", error.message);
+    console.error("Error in getOneProduct | product controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
