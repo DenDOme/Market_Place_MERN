@@ -84,5 +84,5 @@ Product Service: http://localhost:4002
 
 - [ApiGateway](./backend/APIGateway/doc.md) - документация по Api Gateway
 - [AuthService](./backend/AuthService/doc.md) - документация по Auth Service
-- [ProductService](./backend/ProductService/) - документация по Product Service
+- [ProductService](./backend/ProductService/doc.md) - документация по Product Service
 - [OrderService](./backend/OrderService/doc.md) - документация по Order Service
