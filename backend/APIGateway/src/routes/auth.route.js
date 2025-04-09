@@ -14,6 +14,7 @@ router.post("/sessions", redirectMiddleware);
 router.delete("/sessions", redirectMiddleware);
 
 router.post("/password/reset-request", redirectMiddleware);
+router.post("/password/check", redirectMiddleware);
 router.post("/password/reset", redirectMiddleware);
 
 router.put("/profile", authenticateUser, redirectMiddleware);

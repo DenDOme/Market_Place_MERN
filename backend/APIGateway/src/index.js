@@ -19,6 +19,7 @@ import { orderRouter, cartRouter } from "./routes/order.route.js";
 dotenv.config();
 
 const PORT = process.env.PORT;
+const FRONT_URL = process.env.FRONT_URL;
 
 const app = express();
 app.use(cookieParser());
@@ -26,14 +27,14 @@ app.use(express.json());
 app.use(helmet());
 app.use(
   cors({
-    origin: "*",
+    origin: FRONT_URL,
     credentials: true,
   })
 );
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: 100,
   message: "Too many requests, please try again later.",
 });
 app.use(limiter);

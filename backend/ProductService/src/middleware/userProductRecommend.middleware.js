@@ -3,16 +3,30 @@ import Favourite from "../models/favourite.model.js";
 import Review from "../models/review.model.js";
 import Product from "../models/product.model.js";
 
-export const getRecommendedProducts = async (userId) => {
+export const getRecommendedProducts = async (userId = null) => {
   try {
+    if (!userId) {
+      console.log("No userId provided. Guest user detected.");
+
+      const fallbackRecommendations = await Product.aggregate([
+        { $sort: { rating: -1 } },
+        { $sample: { size: 20 } },
+      ]);
+
+      return fallbackRecommendations;
+    }
     console.log("userId is: ", userId);
 
     const userActions = await UserAction.find({ userId });
     console.log("User Actions:", userActions);
 
     if (!userActions.length) {
-      console.log("No user actions found.");
-      return [];
+      console.log("No user actions found. Returning popular products.");
+      const fallbackRecommendations = await Product.aggregate([
+        { $sort: { rating: -1 } },
+        { $sample: { size: 20 } },
+      ]);
+      return fallbackRecommendations;
     }
 
     const clickedCategories = userActions.map((action) =>
@@ -71,14 +85,13 @@ export const getRecommendedProducts = async (userId) => {
 
     if (recommendations.length === 0) {
       console.log(
-        "No products found in clicked categories. Falling back to popular products."
+        "No personalized recommendations. Returning popular products."
       );
-      const newRecommendations = await Product.aggregate([
+      const fallbackRecommendations = await Product.aggregate([
         { $sort: { rating: -1 } },
         { $sample: { size: 20 } },
       ]);
-
-      return newRecommendations;
+      return fallbackRecommendations;
     }
 
     console.log("Final Recommended Products:", recommendations);

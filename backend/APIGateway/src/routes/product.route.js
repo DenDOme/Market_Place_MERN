@@ -9,8 +9,8 @@ export const reviewRouter = express.Router();
 export const userActionRouter = express.Router();
 
 categoryRouter.post("/", authenticateUser, redirectMiddleware);
-categoryRouter.get("/categories", authenticateUser, redirectMiddleware);
-categoryRouter.get("/:id", authenticateUser, redirectMiddleware);
+categoryRouter.get("/categories", redirectMiddleware);
+categoryRouter.get("/:id", redirectMiddleware);
 categoryRouter.put("/:id", authenticateUser, redirectMiddleware);
 categoryRouter.delete("/:id", authenticateUser, redirectMiddleware);
 
@@ -22,13 +22,14 @@ favouriteRouter.delete("/:id", authenticateUser, redirectMiddleware);
 productRouter.post("/", authenticateUser, redirectMiddleware);
 productRouter.delete("/:id", authenticateUser, redirectMiddleware);
 productRouter.put("/", authenticateUser, redirectMiddleware);
-productRouter.get("/:id", authenticateUser, redirectMiddleware);
-productRouter.get("/search", authenticateUser, redirectMiddleware);
-productRouter.get("/filter", authenticateUser, redirectMiddleware);
-productRouter.get("/products", authenticateUser, redirectMiddleware);
+productRouter.get("/:id", redirectMiddleware);
+productRouter.get("/search", redirectMiddleware);
+productRouter.get("/filter", redirectMiddleware);
+productRouter.get("/products", redirectMiddleware);
+productRouter.get("/products/user", authenticateUser, redirectMiddleware);
 
 reviewRouter.post("/", authenticateUser, redirectMiddleware);
-reviewRouter.get("/:id", authenticateUser, redirectMiddleware);
+reviewRouter.get("/:id", redirectMiddleware);
 reviewRouter.delete("/:id", authenticateUser, redirectMiddleware);
 
 userActionRouter.post("/", authenticateUser, redirectMiddleware);

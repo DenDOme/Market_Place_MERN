@@ -159,7 +159,7 @@ export const requestPasswordReset = async (req, res) => {
       .update(resetToken)
       .digest("hex");
     user.resetToken = hashedToken;
-    user.resetTokenExpires = Date.now() + 3600000; // 1 hour expiry
+    user.resetTokenExpires = Date.now() + 3600000;
     await user.save();
 
     const transporter = nodemailer.createTransport({
@@ -186,6 +186,31 @@ export const requestPasswordReset = async (req, res) => {
     res.status(200).json({ message: "Reset token sent to email" });
   } catch (error) {
     console.error("Error in requestPasswordReset | auth controller", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const checkPasswordCode = async (req, res) => {
+  const { resetToken } = req.body;
+
+  try {
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetToken: hashedToken,
+      resetTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    return res.status(200).json({ isCorrect: true });
+  } catch (error) {
+    console.error("Error in checkPasswordCode | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

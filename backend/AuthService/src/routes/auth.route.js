@@ -8,6 +8,7 @@ import {
   requestPasswordReset,
   resetPassword,
   changeRole,
+  checkPasswordCode,
 } from "../controllers/auth.controller.js";
 import {
   protectedRoute,
@@ -21,6 +22,7 @@ router.post("/sessions", login);
 router.delete("/sessions", logout);
 
 router.post("/password/reset-request", requestPasswordReset);
+router.post("/password/check", checkPasswordCode);
 router.post("/password/reset", resetPassword);
 
 router.put("/profile", protectedRoute, updateProfile);

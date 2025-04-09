@@ -256,3 +256,19 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getUserProducts = async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const products = await Product.find({ userId: userId });
+
+    res.status(200).json({ products: products });
+  } catch (error) {
+    console.error(
+      "Error in getUserProducts | product controller",
+      error.message
+    );
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

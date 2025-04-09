@@ -1,29 +1,44 @@
 import Category from "../models/category.model.js";
+import mongoose from "mongoose";
 
 export const createCategory = async (req, res) => {
-  const { name } = req.body;
+  const { name, parentId } = req.body;
 
   try {
     if (!name) {
       return res.status(400).json({ message: "Name field is required" });
     }
 
-    const category = await Category.findOne({ name });
-    if (category) {
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
       return res
         .status(400)
         .json({ message: "Category with this name already exists" });
     }
 
-    const newCategory = new Category({ name });
+    if (parentId && !mongoose.Types.ObjectId.isValid(parentId)) {
+      return res.status(400).json({ message: "Invalid Parent ID" });
+    }
+
+    if (parentId) {
+      const existingParentCategory = await Category.findById(parentId);
+      if (!existingParentCategory) {
+        return res
+          .status(400)
+          .json({ message: "Parent category does not exist" });
+      }
+    }
+
+    const categoryData = parentId ? { name, parentId } : { name };
+
+    console.log(categoryData);
+    const newCategory = new Category(categoryData);
     await newCategory.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Category successfully created",
-        category: newCategory,
-      });
+    res.status(201).json({
+      message: "Category successfully created",
+      category: newCategory,
+    });
   } catch (error) {
     console.error(
       "Error in createCategory | category controller",
