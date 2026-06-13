@@ -1,44 +1,76 @@
 # Product Service
 
-## Описание
+## Overview
 
-**Product Service** — это микросервис, предназначенный для обработки информации о продуктах, управления их рекомендациями и взаимодействия с другими сервисами в архитектуре. Сервис использует очереди сообщений (RabbitMQ) для обмена данными и базу данных MongoDB для хранения информации о продуктах. Он отвечает за создание, изменение и получение данных о продуктах, а также за управление рекомендациями для пользователей.
+**ProductService** manages all product-related data in the marketplace. It handles creating, updating, and retrieving products, organizing them into categories, storing product images via Cloudinary, and publishing/consuming events through RabbitMQ to stay in sync with other services.
 
-## Задачи:
+---
 
-- **Создание и управление продуктами**.  
-   Сервис обеспечивает создание, изменение и удаление продуктов в базе данных, с возможностью привязки продуктов к категориям. Для каждого продукта сохраняется вся необходимая информация, включая название, описание, цену, количество и изображения.
-- **Работа с категориями продуктов**.  
-   Сервис взаимодействует с другими компонентами системы для работы с категориями продуктов. Продукты могут быть классифицированы по категориям, что позволяет улучшить организацию и фильтрацию данных.
-- **Рекомендации продуктов для пользователей**.  
-   Сервис генерирует персонализированные рекомендации продуктов для пользователей на основе их предпочтений и истории покупок. Для этого используется специальная логика на основе данных о продуктах и пользовательских предпочтений.
-- **Обновление данных о продуктах**.  
-   Сервис поддерживает обновление информации о продуктах через сообщения в RabbitMQ, что позволяет синхронизировать данные о продуктах между различными микросервисами и обеспечивать актуальность информации на всех уровнях системы.
+## Responsibilities
 
-## Чем он обязан:
+- **Product CRUD** — create, update, delete, and retrieve products; each product stores name, description, price, quantity, category, and images
+- **Category management** — products are assigned to categories, making filtering and search more organized
+- **Product recommendations** — generates personalized product suggestions based on user preferences and purchase history
+- **Data synchronization via RabbitMQ** — publishes product change events (price updates, availability) so other services (e.g. OrderService) can stay up to date
+- **Image storage via Cloudinary** — all product images are uploaded to and served from Cloudinary for fast, reliable delivery
 
-- **Создание новых продуктов и их сохранение в базе данных**.  
-   Сервис принимает запросы на создание новых продуктов и сохраняет их в MongoDB. Каждый продукт содержит информацию о своем названии, описании, цене, категории и изображениях.
-- **Управление продуктами и их изменениями**.  
-   Сервис предоставляет функционал для обновления данных о продукте, таких как цена, описание, количество и изображения. Все изменения отражаются в базе данных.
-- **Поддержка работы с категориями**.  
-   Сервис позволяет присваивать продукты к категориям. Это помогает организовать данные о продуктах, облегчая поиск и фильтрацию.
-- **Поддержка рекомендаций продуктов**.  
-   Сервис генерирует персонализированные рекомендации для пользователей, опираясь на их предпочтения, историю покупок и поведение на сайте.
-- **Обновление и синхронизация данных через RabbitMQ**.  
-   Сервис использует RabbitMQ для получения сообщений о изменениях данных о продуктах от других сервисов и для отправки сообщений о таких изменениях в другие сервисы, обеспечивая актуальность данных.
-- **Использование Cloudinary для хранения изображений**.  
-   Все изображения продуктов загружаются и хранятся в Cloudinary, что обеспечивает быструю загрузку и обработку изображений, а также их доступность для всех микросервисов.
+---
 
-## Технологии:
+## Tech Stack
 
-- **Express.js**: для создания RESTful API и обработки HTTP-запросов.
-- **MongoDB**: для хранения данных о продуктах и категориях.
-- **Mongoose**: для работы с MongoDB и управления схемами данных.
-- **RabbitMQ**: для обмена сообщениями между микросервисами, синхронизации данных о продуктах и актуализации информации.
-- **Cloudinary**: для хранения и обработки изображений продуктов.
-- **dotenv**: для конфигурации и управления переменными окружения.
+| Package | Purpose |
+|---|---|
+| `Express.js` | HTTP server and REST API |
+| `MongoDB` + `Mongoose` | Product and category data storage |
+| `RabbitMQ` | Async messaging with other services |
+| `Cloudinary` | Product image upload and storage |
+| `dotenv` | Environment configuration |
 
-## Заключение:
+---
 
-**Product Service** является важным компонентом микросервисной архитектуры, который управляет данными о продуктах и их рекомендациями. Сервис активно взаимодействует с другими частями системы через очереди сообщений (RabbitMQ), использует MongoDB для хранения данных и Cloudinary для работы с изображениями. Благодаря этому, сервис обеспечивает высокую производительность, актуальность данных и персонализированные рекомендации для пользователей.
+## API Endpoints
+
+| Method | Route | Description | Auth Required |
+|---|---|---|---|
+| `GET` | `/products` | Get all products | No |
+| `GET` | `/products/:id` | Get a single product by ID | No |
+| `POST` | `/products` | Create a new product | Yes (Admin) |
+| `PUT` | `/products/:id` | Update product details | Yes (Admin) |
+| `DELETE` | `/products/:id` | Delete a product | Yes (Admin) |
+| `GET` | `/products/recommendations` | Get personalized recommendations | Yes |
+| `GET` | `/categories` | Get all categories | No |
+
+---
+
+## RabbitMQ Events
+
+| Event | Direction | Description |
+|---|---|---|
+| `product.updated` | Published | Notifies other services when a product is changed |
+| `product.deleted` | Published | Notifies other services when a product is removed |
+
+---
+
+## Running the Service
+
+```bash
+cd backend/ProductService
+cp .env.example .env   # fill in your values
+npm install
+npm run start
+```
+
+Default port: `4002`
+
+---
+
+## Environment Variables
+
+```env
+PORT=4002
+MONGO_URI=mongodb://localhost:27017/products
+RABBITMQ_URL=amqp://localhost
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```

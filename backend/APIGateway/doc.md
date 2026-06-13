@@ -1,60 +1,77 @@
 # API Gateway
 
-## Описание
+## Overview
 
-**API Gateway** – это центральная точка входа в систему микросервисов маркетплейса. Он маршрутизирует входящие HTTP-запросы к соответствующим сервисам, выполняет базовые проверки безопасности и контролирует частоту запросов, обеспечивая защиту и стабильную работу системы.
+The **API Gateway** is the single entry point for all client requests in the marketplace system. It routes incoming HTTP requests to the appropriate microservices, enforces security policies, and handles rate limiting to protect the system from abuse.
 
-## Основные задачи
+---
 
-API Gateway выполняет ряд ключевых функций:
+## Responsibilities
 
-- **Маршрутизация запросов** – перенаправление API-запросов к нужным микросервисам.
-- **Управление доступом** – реализация аутентификации и авторизации пользователей.
-- **Защита системы** – предотвращение DDoS-атак за счёт ограничения частоты запросов.
-- **Балансировка нагрузки** – равномерное распределение запросов между сервисами.
-- **Логирование и обработка ошибок** – фиксация и обработка ошибок с возвратом корректных статусов ответов.
+- **Request routing** — forwards incoming API calls to the correct microservice based on the route key
+- **Authentication & authorization** — validates JWT tokens and checks user roles before allowing access to protected routes
+- **Security hardening** — applies HTTP security headers and CORS policies
+- **Rate limiting** — prevents DDoS attacks by throttling excessive requests
+- **Error handling & logging** — catches errors and returns proper HTTP status codes to the client
 
-## Функциональные возможности
+---
 
-### 1. Маршрутизация API-запросов
+## How Routing Works
 
-- Перенаправляет запросы к сервисам **Authentication**, **Product**, **Order** и другим.
-- Использует `redirectMiddleware` для корректной маршрутизации запросов.
+All requests follow this pattern:
 
-### 2. Обеспечение безопасности
+```
+http://{gateway_host}/api/{serviceKey}/{remainingPath}
+```
 
-- Применяет `helmet` для защиты HTTP-заголовков.
-- Использует `cors` для управления политикой кросс-доменных запросов.
-- Реализует защиту от частых запросов с помощью `express-rate-limit`.
+- `serviceKey` — identifies which microservice should handle the request (e.g. `auth`, `products`, `orders`)
+- `remainingPath` — the rest of the original request path forwarded to that service
 
-### 3. Аутентификация и авторизация
+The gateway uses `redirectMiddleware` internally to resolve and proxy the request.
 
-- Проверяет подлинность пользователей через middleware `authenticateUser`.
-- Контролирует роли пользователей (`checkUserRole`), ограничивая доступ к определённым операциям.
+---
 
-### 4. Обработка ошибок и логирование
+## Tech Stack
 
-- Логирует ошибки и передаёт клиенту соответствующие ответы.
-- Управляет статусами ответов и заголовками для улучшенной обработки API-запросов.
+| Package | Purpose |
+|---|---|
+| `Express.js` | HTTP server and routing |
+| `axios` | Proxying requests to downstream services |
+| `helmet` | Securing HTTP response headers |
+| `cors` | Cross-origin request policy |
+| `express-rate-limit` | Rate limiting / DDoS protection |
+| `cookie-parser` | Parsing JWT from cookies |
+| `dotenv` | Environment variable management |
 
-## Используемые технологии
+---
 
-- **Express.js** – фреймворк для создания REST API.
-- **dotenv** – управление переменными окружения.
-- **cors** – настройка политики безопасности кросс-доменных запросов.
-- **helmet** – защита HTTP-заголовков.
-- **express-rate-limit** – предотвращение DDoS-атак.
-- **cookie-parser** – работа с куками.
-- **axios** – выполнение HTTP-запросов к другим сервисам.
+## Middleware
 
-## Пример маршрутизации запроса
+- `authenticateUser` — verifies the JWT token on incoming requests
+- `checkUserRole` — restricts access to certain routes based on the user's role (e.g. admin-only routes)
+- `redirectMiddleware` — resolves the target service and proxies the request
 
-`http://${host}/api/${serverKey}/${remainingPath}`
+---
 
-- **host** – URL API Gateway.
-- **serverKey** – уникальный ключ микросервиса, по которому API Gateway определяет, куда направить запрос.
-- **remainingPath** – оставшаяся часть пути запроса.
+## Running the Service
 
-## Заключение
+```bash
+cd backend/APIGateway
+cp .env.example .env   # fill in your values
+npm install
+npm run start
+```
 
-API Gateway – это важнейший компонент системы, обеспечивающий централизованное управление запросами, безопасность и балансировку нагрузки. Его использование значительно упрощает взаимодействие клиентов с микросервисами, повышая надёжность, масштабируемость и безопасность всей системы.
+Default port: `4003`
+
+---
+
+## Environment Variables
+
+```env
+PORT=4003
+JWT_SECRET=your_jwt_secret
+AUTH_SERVICE_URL=http://localhost:4000
+PRODUCT_SERVICE_URL=http://localhost:4002
+ORDER_SERVICE_URL=http://localhost:4001
+```

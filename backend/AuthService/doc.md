@@ -1,101 +1,75 @@
-# AuthService
+# Auth Service
 
-## Описание
+## Overview
 
-**AuthService** — это микросервис для управления аутентификацией и авторизацией пользователей. Он обрабатывает регистрацию, вход, выход, обновление профиля, смену роли, а также управление паролем, включая сброс и запрос на сброс пароля. Все данные пользователей хранятся в базе данных MongoDB, а для аутентификации используется JWT (JSON Web Token).
+**AuthService** is responsible for all user authentication and authorization in the marketplace. It handles registration, login, logout, profile updates, password reset, and role management. User data is stored in MongoDB and sessions are managed using JWT (JSON Web Tokens).
 
-## Функциональные возможности
+---
 
-1. **Регистрация пользователей**
+## Responsibilities
 
-   - Создание новых учетных записей.
-   - Проверка уникальности **email** перед регистрацией.
-   - Хеширование пароля с использованием библиотеки **Bcrypt** перед сохранением в базе данных для обеспечения безопасности.
-   - Отправка подтверждения на email или другие уведомления, если это необходимо.
+- **User registration** — creates new accounts, validates email uniqueness, and hashes passwords with Bcrypt before storing
+- **Login** — validates credentials, compares hashed passwords, and issues a signed JWT
+- **Logout** — invalidates the session by removing the JWT from client cookies
+- **Profile update** — allows users to update their name, email, or password with proper validation and re-hashing on password change
+- **Password reset** — generates a secure reset token, sends it to the user's email via Nodemailer, validates the token, and updates the password
+- **Auth check** — verifies the user's current auth state on every request by validating the JWT; supports refresh token logic for expired sessions
+- **Role management** — allows admins to change user roles (e.g. user → admin); role-change routes are protected and admin-only
+- **Security** — protects all sensitive routes with JWT middleware, hashes passwords with Bcrypt, enforces CORS, and guards against brute force attacks
 
-2. **Вход в систему**
+---
 
-   - Получение учетных данных пользователя (email и пароль).
-   - Валидация введенных данных.
-   - Сравнение введенного пароля с хешированным значением в базе данных.
-   - Генерация и отправка **JWT (JSON Web Token)** для аутентификации сессии.
+## Tech Stack
 
-3. **Выход из системы**
+| Package | Purpose |
+|---|---|
+| `Express.js` | HTTP server and REST API |
+| `MongoDB` + `Mongoose` | User data storage and schema management |
+| `JWT` | Stateless session tokens |
+| `Bcrypt` | Password hashing |
+| `Nodemailer` | Sending password reset emails |
+| `cookie-parser` | Reading JWT from cookies |
+| `cors` | Cross-origin security |
+| `dotenv` | Environment configuration |
 
-   - Инвалидирование сессионного токена (удаление его из клиента или базы данных).
-   - Удаление JWT из cookies или хранилища на клиентской стороне, чтобы предотвратить дальнейшее использование токена.
+---
 
-4. **Обновление профиля пользователя**
+## API Endpoints
 
-   - Поддержка обновлений личных данных, таких как имя, email, и пароль.
-   - Валидация новых данных, чтобы предотвратить ввод некорректной информации (например, изменение email на уже существующий).
-   - Повторная генерация хешированного пароля при его изменении.
+| Method | Route | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/register` | Create a new user account | No |
+| `POST` | `/login` | Log in and receive JWT | No |
+| `POST` | `/logout` | Log out and clear session | Yes |
+| `PUT` | `/profile` | Update user profile | Yes |
+| `POST` | `/password/reset-request` | Send password reset email | No |
+| `POST` | `/password/reset` | Reset password with token | No |
+| `GET` | `/me` | Get current authenticated user | Yes |
+| `PUT` | `/role` | Change user role (admin only) | Yes (Admin) |
 
-5. **Сброс пароля**
+---
 
-   - Генерация уникального токена для сброса пароля.
-   - Отправка токена на email пользователя с помощью **Nodemailer**.
-   - Проверка токена на действительность и его срок годности.
-   - Обновление пароля после подтверждения сброса.
+## Running the Service
 
-6. **Проверка аутентификации**
+```bash
+cd backend/AuthService
+cp .env.example .env   # fill in your values
+npm install
+npm run start
+```
 
-   - Проверка текущего состояния авторизации пользователя при каждом запросе.
-   - Валидация JWT на сервере для доступа к защищённым маршрутам.
-   - Поддержка механизма **refresh tokens** для обновления доступа по мере истечения срока действия токена.
+Default port: `4000`
 
-7. **Смена роли пользователя**
+---
 
-   - Управление ролями пользователей (например, изменение роли с обычного пользователя на администратора).
-   - Защищенные маршруты для изменения ролей, доступные только администраторам.
-   - Обновление данных о ролях в базе данных.
+## Environment Variables
 
-8. **Безопасность**
-
-   - Защита API-маршрутов с использованием **JWT** для аутентификации и проверки прав доступа.
-   - Реализация механизмов защиты от атак, таких как **Brute Force** и **SQL-инъекции**.
-   - Механизмы защиты от межсайтовых запросов (CORS).
-   - Шифрование чувствительных данных, таких как пароли, с использованием **Bcrypt**.
-
-## **Чем он обязан?**
-
-1. **Обработка запросов на регистрацию, вход и выход из системы.**
-
-   - Принимает запросы от клиента и обрабатывает регистрацию или вход в систему.
-   - Возвращает ошибки или успешные ответы в зависимости от валидации данных.
-
-2. **Защита и обновление данных пользователей.**
-
-   - Обеспечивает безопасную работу с данными пользователей, в том числе их обновление.
-   - Шифрует пароли и другие конфиденциальные данные с помощью **Bcrypt**.
-
-3. **Отправка токенов для аутентификации и сброса пароля.**
-
-   - Генерирует JWT-токены для аутентификации сессий.
-   - Создаёт токены для сброса пароля и отправляет их на email.
-
-4. **Управление доступом к защищённым маршрутам.**
-
-   - Проверяет, имеет ли пользователь соответствующие права для доступа к маршрутам.
-   - Позволяет ограничить доступ в зависимости от роли пользователя (например, доступ только для администраторов).
-
-5. **Поддержка безопасного обмена данными с помощью JWT.**
-
-   - Использует JWT для обеспечения безопасного обмена данными между клиентом и сервером.
-   - Каждый запрос, направленный на защищённые маршруты, должен содержать валидный токен.
-
-## Технологии
-
-- **Express.js:** Веб-фреймворк для построения API.
-- **MongoDB:** База данных для хранения информации о пользователях.
-- **Mongoose:** ODM для работы с MongoDB.
-- **JWT (JSON Web Tokens):** Для создания токенов и обеспечения безопасности сессий.
-- **Bcrypt:** Для хеширования паролей.
-- **Nodemailer:** Для отправки электронных писем с токенами сброса пароля.
-- **CookieParser:** Для обработки cookie с JWT.
-- **CORS:** Для обеспечения безопасности при межсайтовых запросах.
-- **Dotenv:** Для управления конфиденциальными данными в окружении.
-
-## Заключение
-
-**AuthService** — это ключевой микросервис для аутентификации и авторизации пользователей, обеспечивающий безопасность данных и управление доступом. Он поддерживает регистрацию, вход, выход, обновление профиля, сброс пароля и смену ролей с помощью JWT и Bcrypt. Защищает маршруты с помощью токенов, а также реализует защиту от атак, таких как Brute Force и CORS.
+```env
+PORT=4000
+MONGO_URI=mongodb://localhost:27017/auth
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+EMAIL_HOST=smtp.gmail.com
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_password
+```

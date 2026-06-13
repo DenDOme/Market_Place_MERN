@@ -1,44 +1,87 @@
 # Order Service
 
-## Описание:
+## Overview
 
-**OrderService** — это микросервис в архитектуре, предназначенный для обработки заказов пользователей, управления корзинами, создания и отслеживания статусов заказов. Он взаимодействует с другими сервисами через очереди сообщений (RabbitMQ) и использует базы данных MongoDB и Redis для хранения и кеширования данных о заказах и корзинах. Этот сервис отвечает за создание новых заказов, получение информации о существующих заказах, изменение их статусов и управление корзинами пользователей.
+**OrderService** handles all order processing and shopping cart management in the marketplace. It creates and tracks orders, manages cart state per user, and communicates with ProductService via RabbitMQ to keep product data up to date. MongoDB is used for persistent storage and Redis is used for caching product data to improve response times.
 
-## Задача:
+---
 
-- **Обработка запросов на создание, изменение, получение и удаление заказов**.  
-   Сервис должен принимать запросы на создание новых заказов, их изменение или удаление. Все изменения должны фиксироваться в базе данных, и пользователю возвращается актуальное состояние заказа.
-- **Управление корзинами пользователей**.  
-   Сервис обеспечивает добавление товаров в корзину, удаление товаров, а также очистку корзины при оформлении заказа. Все изменения в корзине синхронизируются с базой данных.
-- **Поддержка связи с другими микросервисами через RabbitMQ для обновления данных о продуктах**.  
-   Для синхронизации данных о товарах и актуализации информации о наличии или изменении цены товаров, OrderService использует RabbitMQ для обмена сообщениями с ProductService.
-- **Обеспечение взаимодействия с базой данных для хранения информации о заказах и корзинах**.  
-   Все данные о заказах и корзинах сохраняются в MongoDB, что позволяет эффективно обрабатывать запросы, связанные с этими сущностями.
+## Responsibilities
 
-## Чем он обязан:
+- **Order management** — create, update, retrieve, and delete orders; all state is persisted in MongoDB
+- **Cart management** — add/remove items from a user's cart; cart is cleared when an order is placed
+- **Order status tracking** — supports the following statuses: `Pending`, `Processing`, `Shipped`, `Delivered`, `Cancelled`
+- **Inter-service sync via RabbitMQ** — listens for product update/delete events from ProductService to invalidate or update cached product data
+- **Redis caching** — product data received from RabbitMQ is cached in Redis to reduce database calls and speed up cart/order operations
+- **Error handling & data integrity** — uses proper error handling and transactional logic to prevent data corruption on failures
 
-- **Обработка запросов на создание заказа и сохранение его в базе данных**.  
-   Каждый новый заказ сохраняется в MongoDB с указанием всех необходимых данных (товары, количество, пользователь, статус). При изменении статуса заказа или других данных, сервис обновляет запись в базе данных.
-- **Управление корзинами пользователей**.  
-   Сервис отвечает за добавление товаров в корзину, их удаление и общую очистку корзины при оформлении заказа. Для этого сервис использует функционал для работы с MongoDB, а также Redis для кеширования данных о продуктах, которые были получены через RabbitMQ, чтобы ускорить доступ к этим данным.
-- **Поддержка статусов заказов**.  
-   Статусы заказов, такие как "Pending" (ожидает обработки), "Processing" (в процессе), "Shipped" (отправлен), "Delivered" (доставлен) и "Cancelled" (отменен), поддерживаются и обновляются в базе данных в зависимости от изменений состояния заказа.
-- **Обновление и удаление кэшированных данных о продуктах через RabbitMQ**.  
-   В случае изменения информации о продукте (например, цены или наличия), OrderService обновляет кэшированные данные о продуктах через RabbitMQ, чтобы обеспечить актуальность информации.
-- **Использование Redis для кеширования данных и улучшения производительности**.  
-   Для ускорения работы с продуктами и повышения времени отклика запросов, сервис использует Redis для кеширования данных о продуктах. Это позволяет минимизировать обращения к базе данных и значительно улучшить производительность системы.
-- **Обработка ошибок и выполнение транзакций с базой данных для обеспечения целостности данных**.  
-   При выполнении операций с заказами или корзинами важно обеспечивать целостность данных. OrderService использует механизмы обработки ошибок и транзакций для предотвращения потери или повреждения данных при сбоях системы.
+---
 
-## Технологии:
+## Tech Stack
 
-- **Express.js**: для создания RESTful API и обработки запросов.
-- **MongoDB**: для хранения данных о заказах и корзинах.
-- **Mongoose**: для работы с MongoDB.
-- **RabbitMQ**: для обмена сообщениями с другими микросервисами (например, для обновления кэшированных данных о продуктах).
-- **Redis**: для кэширования данных и повышения производительности.
-- **dotenv**: для конфигурации окружения и управления переменными среды.
+| Package | Purpose |
+|---|---|
+| `Express.js` | HTTP server and REST API |
+| `MongoDB` + `Mongoose` | Order and cart data storage |
+| `RabbitMQ` | Async messaging with ProductService |
+| `Redis` | Caching product data for fast access |
+| `dotenv` | Environment configuration |
 
-## Заключение:
+---
 
-**OrderService** — является ключевым компонентом в архитектуре микросервисов, отвечающим за обработку заказов и управление корзинами пользователей. Он эффективно взаимодействует с другими сервисами через RabbitMQ, использует MongoDB для хранения данных и Redis для кеширования информации о продуктах, что значительно улучшает производительность системы. Благодаря поддержке различных статусов заказов и надежной обработке ошибок, сервис гарантирует целостность данных и высокую скорость отклика.
+## API Endpoints
+
+| Method | Route | Description | Auth Required |
+|---|---|---|---|
+| `GET` | `/orders` | Get all orders for the current user | Yes |
+| `GET` | `/orders/:id` | Get a single order by ID | Yes |
+| `POST` | `/orders` | Place a new order | Yes |
+| `PUT` | `/orders/:id/status` | Update order status | Yes (Admin) |
+| `DELETE` | `/orders/:id` | Cancel/delete an order | Yes |
+| `GET` | `/cart` | Get current user's cart | Yes |
+| `POST` | `/cart` | Add an item to the cart | Yes |
+| `DELETE` | `/cart/:itemId` | Remove an item from the cart | Yes |
+| `DELETE` | `/cart` | Clear the entire cart | Yes |
+
+---
+
+## Order Status Flow
+
+```
+Pending → Processing → Shipped → Delivered
+                    ↘
+                   Cancelled
+```
+
+---
+
+## RabbitMQ Events
+
+| Event | Direction | Description |
+|---|---|---|
+| `product.updated` | Consumed | Updates cached product data in Redis |
+| `product.deleted` | Consumed | Removes product from Redis cache |
+
+---
+
+## Running the Service
+
+```bash
+cd backend/OrderService
+cp .env.example .env   # fill in your values
+npm install
+npm run start
+```
+
+Default port: `4001`
+
+---
+
+## Environment Variables
+
+```env
+PORT=4001
+MONGO_URI=mongodb://localhost:27017/orders
+RABBITMQ_URL=amqp://localhost
+REDIS_URL=redis://localhost:6379
+```
