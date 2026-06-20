@@ -34,12 +34,13 @@ export const signup = async (req, res) => {
     });
 
     await newUser.save();
-    generateToken(newUser._id, res);
+    const token = generateToken(newUser._id, res);
 
     res.status(201).json({
       _id: newUser._id,
       fullName: newUser.fullName,
       email: newUser.email,
+      token: token
     });
   } catch (error) {
     console.error("Error in signup | auth controller", error);
@@ -69,12 +70,13 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    generateToken(user._id, res);
+    const token = generateToken(user._id, res);
 
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
+      token: token
     });
   } catch (error) {
     console.error("Error in login | auth controller", error);
@@ -129,7 +131,12 @@ export const updateProfile = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
+    res.cookie("jwt", "", { 
+      maxAge: 0,
+      httpOnly: true,
+      sameSite: "none",
+      secure: process.env.NODE_ENV != "dev"
+    });
     res.status(200).json({ message: "Logged out successfuly" });
   } catch (error) {
     console.error("Error in logout | auth controller", error);

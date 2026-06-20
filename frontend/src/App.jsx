@@ -12,6 +12,8 @@ import DetailedSearch from "./pages/product/DetailedSearch";
 import ProductDetails from "./pages/product/ProductDetails";
 import CreateProduct from "./pages/product/CreateProduct";
 import UpdateProduct from "./pages/product/UpdateProduct";
+import Cart from "./pages/order/CartList";
+import Checkout from "./pages/order/Checkout";
 
 function App() {
   return (
@@ -37,6 +39,9 @@ function App() {
         <Route path="/password/request" element={<RequestPasswordChange />} />
         <Route path="/password/confirm" element={<ResetPasswordChange />} />
         <Route path="/password/change" element={<ResetPassword />} />
+
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Routes>
 
       <Footer />

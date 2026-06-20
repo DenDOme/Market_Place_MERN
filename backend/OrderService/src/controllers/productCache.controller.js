@@ -20,22 +20,25 @@ export const removeProductCache = async (productId) => {
 
 export const getProductData = async (productId) => {
   let product = await redisClient.get(`product:${productId}`);
+  if (product) return JSON.parse(product);
 
-  if (!product) {
-    console.log("Cache missing, fetching from db");
-    product = await ProductCache.findOne({ productId });
-
-    if (product) {
-      await redisClient.set(
-        `product:${productId}`,
-        JSON.stringify(product),
-        "EX",
-        3600
-      );
-    }
-  } else {
-    product = JSON.parse(product);
+  product = await ProductCache.findOne({ productId });
+  if (product) {
+    await redisClient.set(`product:${productId}`, JSON.stringify(product), "EX", 3600);
+    return product;
   }
 
-  return product;
+  try {
+    const response = await axios.get(
+      `${process.env.PRODUCT_SERVICE_URL}/product-service/product/${productId}`
+    );
+    const data = response.data.product;
+    if (data) {
+      await updateProductCache(productId, { productId, name: data.name, price: data.price });
+    }
+    return data;
+  } catch (err) {
+    console.error("Fallback fetch failed:", err.message);
+    return null;
+  }
 };

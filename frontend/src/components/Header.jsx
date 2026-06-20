@@ -7,6 +7,7 @@ import Profile from "../assets/images/profile-icon.svg";
 import Logout from "../assets/images/logout-icon.svg";
 import SearchIcon from "../assets/images/search.svg";
 import DetailsIcon from "../assets/images/details.svg";
+import CartIcon from "../assets/images/basket-icon.svg";
 import { useNavigate } from "react-router-dom";
 import { fetchSearchProducts } from "../stores/slices/productSlice";
 
@@ -49,6 +50,10 @@ const Header = () => {
     dispatch(fetchSearchProducts(searchInput));
   };
 
+  const handleNavigateCart = () => {
+    navigate(`/cart`);
+  }
+ 
   return (
     <header className="container w-full flex justify-between items-center py-3 bg-white z-50 relative">
       <div
@@ -84,6 +89,12 @@ const Header = () => {
         {user ? (
           <>
             <button
+              onClick={handleNavigateCart}
+              className="bg-dark hover:bg-[#4e4e4e] text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
+            >
+              <img src={CartIcon} alt="Profile" className="w-6 h-6" />
+            </button>
+            <button
               onClick={handleRedirectProfile}
               className="bg-dark hover:bg-[#4e4e4e] text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
             >
@@ -97,12 +108,14 @@ const Header = () => {
             </button>
           </>
         ) : (
-          <button
-            onClick={handleRedirectLogin}
-            className="bg-dark hover:bg-[#4e4e4e] text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
-          >
-            <img src={Login} alt="Login" className="w-6 h-6" />
-          </button>
+          <>
+            <button
+              onClick={handleRedirectLogin}
+              className="bg-dark hover:bg-[#4e4e4e] text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
+            >
+              <img src={Login} alt="Login" className="w-6 h-6" />
+            </button>
+          </>
         )}
       </div>
     </header>

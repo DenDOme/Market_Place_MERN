@@ -81,7 +81,19 @@ export const getCart = async (req, res) => {
   try {
     const cart = await createCart(userId);
 
-    return res.status(200).json({ cart });
+    const items = await Promise.all(
+      cart.items.map(async (item) => {
+        const product = await getProductData(item.productId.toString());
+
+        return {
+          ...item.toObject(),
+          name: product?.name ?? null,
+          price: product?.price ?? item.price,
+        };
+      })
+    );
+
+    return res.status(200).json({ cart: { ...cart.toObject(), items } });
   } catch (error) {
     console.error("Error in getCart | cart controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });

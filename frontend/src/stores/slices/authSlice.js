@@ -96,7 +96,7 @@ export const checkPasswordCode = createAsyncThunk(
   "auth/checkPasswordCode",
   async (code, { rejectWithValue }) => {
     try {
-      const response = await API.post(`${authUrl}/password/reset-code`, code);
+      const response = await API.post(`${authUrl}/password/check`, code);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Code check failed");
@@ -153,28 +153,32 @@ const authSlice = createSlice({
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        if (action.payload.token) {
+          localStorage.setItem("jwt", action.payload.token);
+        }
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
       .addCase(login.pending, (state) => {
         state.loading = true;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        if (action.payload.token) {
+          localStorage.setItem("jwt", action.payload.token);
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
+        localStorage.removeItem("jwt");
       })
-
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload;
       })

@@ -10,11 +10,14 @@ const initialState = {
 
 const orderUrl = import.meta.env.VITE_API_URL + "/cart";
 
+const calcTotal = (items) =>
+  items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await API.get(`${orderUrl}/cart`);
+      const response = await API.get(`${orderUrl}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch cart");
@@ -24,10 +27,10 @@ export const fetchCart = createAsyncThunk(
 
 export const addItemToCart = createAsyncThunk(
   "cart/addItem",
-  async (itemId, { rejectWithValue }) => {
+  async (itemId, { dispatch, rejectWithValue }) => {
     try {
-      const response = await API.post(`${orderUrl}/cart/${itemId}`, {});
-      return response.data;
+      await API.post(`${orderUrl}/${itemId}`, {});
+      await dispatch(fetchCart()).unwrap();
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Failed to add item to cart"
@@ -38,10 +41,10 @@ export const addItemToCart = createAsyncThunk(
 
 export const removeItemFromCart = createAsyncThunk(
   "cart/removeItem",
-  async (itemId, { rejectWithValue }) => {
+  async (itemId, { dispatch, rejectWithValue }) => {
     try {
-      await API.delete(`${orderUrl}/cart/${itemId}`);
-      return itemId;
+      await API.delete(`${orderUrl}/${itemId}`);
+      await dispatch(fetchCart()).unwrap();
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Failed to remove item from cart"
@@ -63,11 +66,13 @@ const cartSlice = createSlice({
     builder
       .addCase(fetchCart.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cartItems = action.payload.items;
-        state.totalPrice = action.payload.totalPrice;
+        const items = action.payload.cart.items ?? [];
+        state.cartItems = items;
+        state.totalPrice = calcTotal(items);
       })
       .addCase(fetchCart.rejected, (state, action) => {
         state.loading = false;
@@ -76,11 +81,7 @@ const cartSlice = createSlice({
 
       .addCase(addItemToCart.pending, (state) => {
         state.loading = true;
-      })
-      .addCase(addItemToCart.fulfilled, (state, action) => {
-        state.loading = false;
-        state.cartItems.push(action.payload);
-        state.totalPrice += action.payload.price;
+        state.error = null;
       })
       .addCase(addItemToCart.rejected, (state, action) => {
         state.loading = false;
@@ -89,16 +90,7 @@ const cartSlice = createSlice({
 
       .addCase(removeItemFromCart.pending, (state) => {
         state.loading = true;
-      })
-      .addCase(removeItemFromCart.fulfilled, (state, action) => {
-        state.loading = false;
-        const index = state.cartItems.findIndex(
-          (item) => item.id === action.payload
-        );
-        if (index !== -1) {
-          state.totalPrice -= state.cartItems[index].price;
-          state.cartItems.splice(index, 1);
-        }
+        state.error = null;
       })
       .addCase(removeItemFromCart.rejected, (state, action) => {
         state.loading = false;

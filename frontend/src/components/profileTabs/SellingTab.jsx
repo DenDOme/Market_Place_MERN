@@ -58,7 +58,7 @@ const SellingTab = () => {
                 className="border rounded-lg p-4 shadow hover:shadow-md transition"
               >
                 <img
-                  src={product.image}
+                  src={product.images[0]}
                   alt={product.name}
                   className="w-full h-48 object-cover rounded mb-2"
                 />

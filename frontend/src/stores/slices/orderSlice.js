@@ -26,12 +26,10 @@ export const fetchOrderDetails = createAsyncThunk(
   "orders/fetchOrderDetails",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await API.get(`${orderUrl}/orders/${orderId}`);
+      const response = await API.get(`${orderUrl}/${orderId}`); 
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch order details"
-      );
+      return rejectWithValue(error.response?.data || "Failed to fetch order details");
     }
   }
 );
@@ -40,7 +38,7 @@ export const createOrder = createAsyncThunk(
   "orders/createOrder",
   async (orderData, { rejectWithValue }) => {
     try {
-      const response = await API.post(`${orderUrl}/orders`, orderData);
+      const response = await API.post(`${orderUrl}/`, orderData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to create order");
@@ -52,7 +50,7 @@ export const deleteOrder = createAsyncThunk(
   "orders/deleteOrder",
   async (orderId, { rejectWithValue }) => {
     try {
-      await API.delete(`${orderUrl}/orders/${orderId}`);
+      await API.delete(`${orderUrl}/${orderId}`); 
       return orderId;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to delete order");
@@ -64,14 +62,10 @@ export const changeOrderStatus = createAsyncThunk(
   "orders/changeOrderStatus",
   async ({ orderId, status }, { rejectWithValue }) => {
     try {
-      const response = await API.put(`${orderUrl}/orders/${orderId}/status`, {
-        status,
-      });
+      const response = await API.put(`${orderUrl}/${orderId}/status`, { status }); 
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to update order status"
-      );
+      return rejectWithValue(error.response?.data || "Failed to update order status");
     }
   }
 );
@@ -113,9 +107,8 @@ const orderSlice = createSlice({
       .addCase(createOrder.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createOrder.fulfilled, (state, action) => {
+      .addCase(createOrder.fulfilled, (state) => {
         state.loading = false;
-        state.orders.push(action.payload);
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;

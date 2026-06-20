@@ -4,11 +4,16 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL + "/auth-service";
 
 export const authenticateUser = async (req, res, next) => {
   const authCookie = req.headers.cookie;
+  const authToken = req.headers.authorization?.split(" ")[1];
   try {
-    if (!authCookie) return res.status(401).json({ message: "Unauthorized" });
+    if (!authCookie && !authToken) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const response = await axios.get(`${AUTH_SERVICE_URL}/auth/check-user`, {
-      headers: { cookie: authCookie },
+      headers: { 
+        cookie: authCookie || `jwt=${authToken}`
+      },
     });
 
     req.user = response.data;
@@ -16,18 +21,19 @@ export const authenticateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("error in authenticateUser || auth middleware", error);
-    res.status(403).json({ message: "Forbidden" });
+    console.error("Auth service error:", error.response?.status, error.response?.data);
+    res.status(401).json({ message: "Unauthorized", error: error });
   }
 };
 
 export const checkUserRole = async (req, res, next) => {
   const authCookie = req.headers.cookie;
+  const authToken = req.headers.authorization?.split(" ")[1];
   try {
-    if (!authCookie) return res.status(401).json({ message: "Unauthorized" });
+    if (!authCookie && !authToken) return res.status(401).json({ message: "Unauthorized" });
 
     const response = await axios.get(`${AUTH_SERVICE_URL}/auth/check-user`, {
-      headers: { cookie: authCookie },
+      headers: { cookie: authCookie || `jwt=${authToken}` },
     });
 
     if (response.data.role !== "admin") {
