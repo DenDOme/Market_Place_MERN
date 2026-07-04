@@ -12,7 +12,7 @@ A full-stack marketplace application built with a **service-oriented architectur
 
 ## 🚀 Live Demo
 
-> _No live deployment yet — run locally with Docker (see below)_
+> [https://knight-mern.vercel.app/](https://knight-mern.vercel.app/)
 
 ---
 
@@ -184,7 +184,7 @@ Full-stack приложение маркетплейса, построенное
 
 ## 🚀 Демо
 
-> _Живого деплоя пока нет — запустите локально через Docker (см. ниже)_
+> [https://knight-mern.vercel.app/](https://knight-mern.vercel.app/)
 
 ---
 
