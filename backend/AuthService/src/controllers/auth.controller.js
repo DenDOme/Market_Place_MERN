@@ -4,12 +4,18 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
+const RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
 
   try {
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields must be provided" });
+    }
+
+    if(RE.test(email) == false) {
+      return res.status(400).json({ message: "Invalide email provided"});
     }
 
     if (password.length < 6) {
@@ -42,6 +48,7 @@ export const signup = async (req, res) => {
       email: newUser.email,
       token: token
     });
+  
   } catch (error) {
     console.error("Error in signup | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -78,6 +85,7 @@ export const login = async (req, res) => {
       email: user.email,
       token: token
     });
+  
   } catch (error) {
     console.error("Error in login | auth controller", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -107,6 +115,11 @@ export const updateProfile = async (req, res) => {
       if (emailExists) {
         return res.status(400).json({ message: "Email is already in use" });
       }
+
+      if(RE.test(email) == false) {
+        return res.status(400).json({ message: "Invalide email provided"});
+      }
+
       user.email = email;
     }
 
@@ -156,6 +169,10 @@ export const checkAuth = (req, res) => {
 export const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
   try {
+    if(RE.test(email) == false) {
+      return res.status(400).json({ message: "Invalide email provided"});
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) return res.status(404).json({ message: "User not found" });

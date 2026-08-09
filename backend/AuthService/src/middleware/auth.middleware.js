@@ -6,7 +6,7 @@ export const protectedRoute = async (req, res, next) => {
     const token = req.cookies.jwt;
 
     if (!token) {
-      return res.status(400).json({ message: "Unauthorized - no token" });
+      return res.status(401).json({ message: "Unauthorized - no token" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -35,7 +35,7 @@ export const protectedAdminRoute = async (req, res, next) => {
     const token = req.cookies.jwt;
 
     if (!token) {
-      return res.status(400).json({ message: "Unauthorized - no token" });
+      return res.status(401).json({ message: "Unauthorized - no token" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
