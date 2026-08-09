@@ -106,3 +106,39 @@ describe("POST /sessions || authorize and authenticate users", () => {
         expect(res.body.message).toBeDefined();
     })
 })
+
+describe("DELETE /sessions || logout from user", () => {
+
+    let cookie;
+
+    beforeEach(async () => {
+        const data = {
+            email: "safe@gmail.com",
+            password: "Test12345"
+        };
+
+        const res = await request(app)
+            .post("/auth-service/auth/sessions")
+            .send(data);
+
+        cookie = res.headers['set-cookie'];
+    });
+
+    it("should logout user and clear cookies", async () => {
+        const res = await request(app)
+            .delete("/auth-service/auth/sessions")
+            .set("Cookie", cookie)
+            .expect(200)
+
+        expect(res.headers[set-cookies][0]).toMatch(/jwt=;/)
+    })
+
+    it("shouldn't logout user and clear cookies", async () => {
+        const res = await request(app)
+            .delete("/auth-service/auth/sessions")
+            .expect(401)
+
+        expect(res.body.message).toBeDefined()
+    })
+
+})

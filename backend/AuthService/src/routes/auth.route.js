@@ -19,7 +19,7 @@ const router = express.Router();
 
 router.post("/users", signup);
 router.post("/sessions", login);
-router.delete("/sessions", logout);
+router.delete("/sessions", protectedRoute, logout);
 
 router.post("/password/reset-request", requestPasswordReset);
 router.post("/password/check", checkPasswordCode);
